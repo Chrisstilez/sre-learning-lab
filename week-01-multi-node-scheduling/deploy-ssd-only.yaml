@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssd-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ssd-app
+  template:
+    metadata:
+      labels:
+        app: ssd-app
+    spec:
+      nodeSelector:
+        disk: ssd
+      containers:
+      - name: nginx
+        image: nginx:alpine
