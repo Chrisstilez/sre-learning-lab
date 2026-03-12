@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config-file
+data:
+  config.json: |
+    {
+      "feature_flags": {
+        "dark_mode": true,
+        "beta_features": false,
+        "max_upload_mb": 50
+      }
+    }
