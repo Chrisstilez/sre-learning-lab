@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-test
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["sh", "-c", "echo 'data survives pods' > /data/test.txt && sleep 3600"]
+    volumeMounts:
+    - name: my-storage
+      mountPath: /data
+  volumes:
+  - name: my-storage
+    persistentVolumeClaim:
+      claimName: test-storage
