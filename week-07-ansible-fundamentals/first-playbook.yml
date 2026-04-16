@@ -1,0 +1,22 @@
+---
+- name: My first Ansible playbook
+  hosts: local
+  tasks:
+
+      - name: Create a directory
+        file:
+          path: /tmp/ansible-test
+          state: directory
+          mode: '0755'
+
+      - name: Create a file with content
+        copy:
+          content: "Hello from Ansible!\n"
+          dest: /tmp/ansible-test/hello.txt
+          mode: '0644'
+
+      - name: Make sure a package is installed
+        apt:
+          name: htop
+          state: present
+        become: yes
