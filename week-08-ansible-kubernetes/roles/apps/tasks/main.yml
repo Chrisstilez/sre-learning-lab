@@ -1,0 +1,82 @@
+---
+# Apps role — deploys applications to Kubernetes
+
+- name: Create app namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ app_namespace }}"
+
+- name: Create database secret from vault
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: db-credentials
+        namespace: "{{ app_namespace }}"
+      type: Opaque
+      stringData:
+        password: "{{ db_password }}"
+
+- name: Deploy application
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ app_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        replicas: "{{ app_replicas }}"
+        selector:
+          matchLabels:
+            app: "{{ app_name }}"
+        template:
+          metadata:
+            labels:
+              app: "{{ app_name }}"
+          spec:
+            containers:
+            - name: "{{ app_name }}"
+              image: "{{ app_image }}"
+              ports:
+              - containerPort: "{{ app_port }}"
+
+- name: Create app service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ app_name }}"
+        namespace: "{{ app_namespace }}"
+      spec:
+        type: NodePort
+        selector:
+          app: "{{ app_name }}"
+        ports:
+        - port: "{{ app_port }}"
+          targetPort: "{{ app_port }}"
+          nodePort: "{{ node_port }}"
+
+- name: Wait for pods to be ready
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ app_namespace }}"
+    label_selectors:
+      - "app={{ app_name }}"
+  register: pod_info
+  until: pod_info.resources | selectattr('status.phase', 'equalto', 'Running') | list | length >= app_replicas | int
+  retries: 30
+  delay: 5
+
+- name: Show deployment status
+  debug:
+    msg: "Deployed {{ pod_info.resources | length }} pods for {{ app_name }} in {{ app_namespace }}"

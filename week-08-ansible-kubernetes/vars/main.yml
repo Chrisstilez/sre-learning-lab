@@ -1,0 +1,15 @@
+# Cluster settings
+cluster_name: sre-dojo
+worker_count: 2
+
+# App settings
+app_namespace: production
+app_name: web-app
+app_replicas: 3
+app_image: nginx:alpine
+app_port: 80
+node_port: 30080
+
+# Monitoring
+monitoring_namespace: monitoring
+grafana_port: 31090

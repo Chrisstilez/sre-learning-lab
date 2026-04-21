@@ -1,0 +1,26 @@
+---
+# Common role - ensures basic packages are installed
+# This runs first before any other role
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600 # Don't update if cache is less than 1 hour old
+  become: yes
+
+- name: Install essential packages
+  apt:
+    name:
+      - curl
+      - git
+      - jq
+      - nano
+      - htop
+      - python3-pip
+    state: present
+  become: yes
+
+- name: Show system info
+  debug:
+    msg: "system: {{ ansible_distribution }} {{ ansible_distribution_version }} | Arch: {{ ansible_architecture }} | CPUs: {{ ansible_processor_vcpus }} | RAM: {{ ansible_memtotal_mb }}MB"
+

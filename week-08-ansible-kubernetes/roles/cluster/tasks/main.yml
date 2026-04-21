@@ -1,0 +1,66 @@
+---
+# Cluster role — installs Kind and kubectl, creates the K8s cluster
+
+- name: Check if Kind is installed
+  command: kind version
+  register: kind_check
+  changed_when: false
+  failed_when: false
+
+- name: Install Kind
+  get_url:
+    url: "https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-{{ ansible_architecture | replace('aarch64', 'arm64') | replace('x86_64', 'amd64') }}"
+    dest: /usr/local/bin/kind
+    mode: '0755'
+  become: yes
+  when: kind_check.rc != 0
+
+- name: Check if kubectl is installed
+  command: kubectl version --client
+  register: kubectl_check
+  changed_when: false
+  failed_when: false
+
+- name: Get latest kubectl version
+  uri:
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: yes
+  register: kubectl_version
+  when: kubectl_check.rc != 0
+
+- name: Install kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version.content | trim }}/bin/linux/{{ ansible_architecture | replace('aarch64', 'arm64') | replace('x86_64', 'amd64') }}/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+  become: yes
+  when: kubectl_check.rc != 0
+
+- name: Check if cluster exists
+  command: kind get clusters
+  register: existing_clusters
+  changed_when: false
+
+- name: Generate Kind config
+  template:
+    src: kind-config.yaml.j2
+    dest: /tmp/kind-config.yaml
+    mode: '0644'
+  when: cluster_name not in existing_clusters.stdout
+
+- name: Create Kind cluster
+  command: "kind create cluster --name {{ cluster_name }} --config /tmp/kind-config.yaml"
+  when: cluster_name not in existing_clusters.stdout
+
+- name: Wait for nodes to be ready
+  command: kubectl wait --for=condition=Ready nodes --all --timeout=120s
+  changed_when: false
+
+- name: Verify cluster
+  command: kubectl get nodes -o wide
+  register: nodes_info
+  changed_when: false
+
+- name: Show cluster status
+  debug:
+    msg: "{{ nodes_info.stdout_lines }}"

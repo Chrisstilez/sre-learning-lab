@@ -1,0 +1,14 @@
+---
+- name: SRE Lab - Full Stack Deployment
+  hosts: local
+  vars_files:
+    - vars/main.yml
+    - secrets.yml
+
+  roles:
+    - { role: common, tags: ['common', 'setup'] }
+    - { role: docker, tags: ['docker', 'setup'] }
+    - { role: cluster, tags: ['cluster', 'k8s'] }
+    - { role: apps, tags: ['apps', 'k8s'] }
+    - { role: monitoring, tags: ['monitoring', 'k8s'] }
+
