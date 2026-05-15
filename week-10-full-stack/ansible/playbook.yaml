@@ -1,0 +1,11 @@
+---
+- name: SRE Full Stack — Configure and Deploy
+  hosts: local
+  vars_files:
+    - vars/main.yml
+    - secrets.yml
+
+  roles:
+    - cluster-setup
+    - apps
+    - monitoring

@@ -1,0 +1,4 @@
+cluster_name: sre-dojo
+app_namespace: production
+monitoring_namespace: monitoring
+grafana_port: 31090

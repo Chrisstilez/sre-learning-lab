@@ -1,0 +1,25 @@
+---
+- name: Apply app deployments
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ playbook_dir }}/../k8s/deployments/web-app.yaml"
+
+- name: Apply app services
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ playbook_dir }}/../k8s/services/web-app.yaml"
+
+- name: Wait for pods to be ready
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ app_namespace }}"
+    label_selectors:
+      - "app=web-app"
+  register: pod_info
+  until: pod_info.resources | selectattr('status.phase', 'equalto', 'Running') | list | length >= 3
+  retries: 30
+  delay: 5
+
+- name: Show deployment status
+  debug:
+    msg: "Deployed {{ pod_info.resources | length }} pods in {{ app_namespace }}"

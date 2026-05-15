@@ -1,0 +1,27 @@
+---
+- name: Verify cluster is running
+  command: kubectl get nodes
+  register: nodes_output
+  changed_when: false
+
+- name: Show cluster status
+  debug:
+    msg: "{{ nodes_output.stdout_lines }}"
+
+- name: Create production namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ app_namespace }}"
+
+- name: Create monitoring namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ monitoring_namespace }}"
