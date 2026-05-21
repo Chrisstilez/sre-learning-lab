@@ -33,25 +33,33 @@ Docker Hub pulls and local image loading, with rollback validation.
 
 ### Docker Hub Pull
 
-helm upgrade grafana grafana/grafana 
---namespace grafana-upgrade-lab 
---version 10.1.2 
---reuse-values 
---set image.tag=13.0.1
+```bash
+helm upgrade grafana grafana/grafana \
+  --namespace grafana-upgrade-lab \
+  --version 10.1.2 \
+  --reuse-values \
+  --set image.tag=13.0.1
+```
 
 ### Local Image Load
-docker pull grafana/grafana:13.0.1-security-01
-docker save grafana/grafana:13.0.1-security-01 -o /tmp/grafana-13.tar
-cat /tmp/grafana-13.tar | docker exec -i <node> ctr --namespace=k8s.io images import -
-helm upgrade grafana grafana/grafana 
---namespace grafana-upgrade-lab 
---version 10.1.2 
---reuse-values 
---set image.tag=13.0.1-security-01 
---set image.pullPolicy=Never
+
+```bash
+docker pull grafana/grafana:13.0.1-security-01 \
+docker save grafana/grafana:13.0.1-security-01 -o /tmp/grafana-13.tar \
+cat /tmp/grafana-13.tar | docker exec -i <node> ctr --namespace=k8s.io images import - \
+helm upgrade grafana grafana/grafana \
+--namespace grafana-upgrade-lab \
+--version 10.1.2 \
+--reuse-values \
+--set image.tag=13.0.1-security-01 \ 
+--set image.pullPolicy=Never \
+```
 
 ### Rollback
+
+```bash
 helm rollback grafana <revision> -n grafana-upgrade-lab
+```
 
 ## Grafana 13 Key Changes
 - New: Git Sync (GA), Dashboard Restore, Dashboards API v2, Dynamic Dashboards, Grafana Assistant
