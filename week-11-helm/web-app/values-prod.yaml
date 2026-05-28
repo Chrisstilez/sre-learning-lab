@@ -1,0 +1,16 @@
+replicaCount: 5
+
+image:
+  tag: "1.27-alpine"
+
+service:
+  type: NodePort
+  nodePort: 30082
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

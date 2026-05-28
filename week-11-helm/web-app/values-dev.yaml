@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  tag: "alpine"
+
+service:
+  type: ClusterIP
+  nodePort: null
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 50m
+    memory: 64Mi

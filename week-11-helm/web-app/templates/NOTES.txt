@@ -1,0 +1,8 @@
+Web App deployed successfully!
+
+  Release: {{ .Release.Name }}
+  Replicas: {{ .Values.replicaCount }}
+  Image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+
+Access the service:
+  kubectl get svc -n {{ .Release.Namespace }} {{ include "web-app.fullname" . }}

@@ -1,0 +1,29 @@
+# Web App — Helm Chart Values
+
+replicaCount: 3
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "alpine"
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30080
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Features we don't need for this lab
+serviceAccount:
+  create: false
+ingress:
+  enabled: false
+autoscaling:
+  enabled: false
