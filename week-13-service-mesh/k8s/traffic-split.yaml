@@ -1,0 +1,19 @@
+apiVersion: policy.linkerd.io/v1beta3
+kind: HTTPRoute
+metadata:
+  name: backend-split
+  namespace: mesh-demo
+spec:
+  parentRefs:
+  - name: backend
+    kind: Service
+    group: core
+    port: 8080
+  rules:
+  - backendRefs:
+    - name: backend-v1
+      port: 8080
+      weight: 0
+    - name: backend-v2
+      port: 8080
+      weight: 100
