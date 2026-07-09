@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: low-prio-app
+  namespace: priority-test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: low-prio-app
+  template:
+    metadata:
+      labels:
+        app: low-prio-app
+    spec:
+      priorityClassName: low-priority
+      nodeSelector:
+        kubernetes.io/hostname: sre-dojo-worker
+      containers:
+      - name: filler
+        image: nginx:alpine
+        resources:
+          requests:
+            cpu: "2"
+            memory: 2Gi
+          limits:
+            cpu: "2"
+            memory: 2Gi

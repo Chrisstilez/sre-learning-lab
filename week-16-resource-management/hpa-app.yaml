@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-load
+  namespace: hpa-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-load
+  template:
+    metadata:
+      labels:
+        app: php-load
+    spec:
+      containers:
+      - name: php-load
+        image: registry.k8s.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-load
+  namespace: hpa-test
+spec:
+  selector:
+    app: php-load
+  ports:
+  - port: 80

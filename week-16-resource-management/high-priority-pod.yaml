@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: high-prio-pod
+  namespace: priority-test
+spec:
+  priorityClassName: high-priority
+  nodeSelector:
+    kubernetes.io/hostname: sre-dojo-worker
+  containers:
+  - name: important
+    image: nginx:alpine
+    resources:
+      requests:
+        cpu: "2"
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 2Gi
