@@ -1,5 +1,5 @@
 # Week 17 — Troubleshooting Challenges
-
+ 
 Diagnosing broken workloads cold — no walkthrough, walk the chain: get -> describe -> logs -> events.
 
 ## Challenge 1 — ImagePullBackOff
@@ -28,3 +28,15 @@ Lesson: this failure shows NO error in describe/logs — get endpoints is the de
 - kubectl logs <pod> -n <ns> [--previous]
 - kubectl get endpoints <svc> -n <ns>
 - kubectl run testcurl --image=busybox:1.36 -n <ns> --rm -it --restart=Never -- wget -qO- <svc>
+
+## Challenge 4 — Pending pod (storage, not scheduling)
+Symptom: pod stuck Pending. describe pod Events said "FailedScheduling: unbound PersistentVolumeClaims" — looks like scheduling, but the real cause is storage.
+Diagnosis: dropped a layer — kubectl get pvc showed the PVC also Pending. describe pvc Events: storageclass "fast-ssd" not found. get storageclass confirmed only "standard" exists.
+Root cause: PVC referenced a StorageClass that does not exist, so it never bound; pod cannot schedule without its volume.
+Fix: storageClassName is immutable, so deleted the pod, deleted the PVC, recreated both against the real "standard" class. PVC bound (WaitForFirstConsumer binds once the pod consumes it), pod Running.
+Lesson: a "FailedScheduling" message can be a storage problem in disguise — read the actual Events text, do not trust the label. When a pod is Pending, ask: scheduling or storage?
+
+## Diagnostic commands (storage)
+- kubectl get pvc -n <ns>
+- kubectl describe pvc <name> -n <ns>   (Events = why it will not bind)
+- kubectl get storageclass
