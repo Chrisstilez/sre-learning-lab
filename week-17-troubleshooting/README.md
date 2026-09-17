@@ -40,3 +40,22 @@ Lesson: a "FailedScheduling" message can be a storage problem in disguise — re
 - kubectl get pvc -n <ns>
 - kubectl describe pvc <name> -n <ns>   (Events = why it will not bind)
 - kubectl get storageclass
+
+## Challenge 5 — "Running" but not healthy (silent startup error)
+Symptom: pod shows Running / 1-1 Ready — looks fine.
+Diagnosis: kubectl logs revealed a startup error (cat: file not found) that got silently swallowed because the container's commands were chained with ';' — the failed step didn't kill the container, so it stayed up.
+Lesson: "Running" is a green light on the surface — it does NOT mean healthy. A pod can be up while a config load, dependency, or startup step failed quietly. Confirm with the logs. (A green light isn't verification.)
+
+## Challenge 6 — CrashLoopBackOff
+Symptom: pod restarting repeatedly, climbing restart count, CrashLoopBackOff.
+Diagnosis: kubectl describe showed State: Terminated, Reason: Error, Exit Code 1 (and Last State the same) with BackOff events — Kubernetes throttling restarts of a container that keeps failing on startup.
+Root cause: container exits 1 on startup (in a real app: missing env/config, unreachable dependency, bad command).
+Fix: read the logs to find WHY it's crashing. For a crashed container use: kubectl logs <pod> -n <ns> --previous  (shows the dead container's output — the actual error).
+Note: it's `kubectl logs` (not `kubectl get logs`), and it needs the POD name, not the deployment name.
+
+## The 5 core failure categories (now all covered)
+1. ImagePullBackOff — bad image/tag/registry
+2. ContainerCreating stuck — missing ConfigMap/Secret (logs empty, container never ran)
+3. Service no endpoints — selector/label mismatch (get endpoints = the check)
+4. Pending — scheduling OR storage (read Events; unbound PVC = storage one layer down)
+5. CrashLoopBackOff — app crashes on startup (logs --previous shows why)
